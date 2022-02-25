@@ -11,16 +11,16 @@ import (
 	"github.com/eavesmy/notice/option"
 )
 
-func Feishu(opt option.Option, ctx context.Context) *Common {
-	return (&Common{
-		Channel: CHANNEL_FEISHU,
+func Feishu(opt option.Option, ctx context.Context) *Client {
+	return (&Client{
+		Channel: channel_feishu,
 		Opt:     opt,
 		Ctx:     ctx,
 		Chan:    make(chan string, 10),
 	}).Init()
 }
 
-type Group []*Common
+type Group []*Client
 
 func (g *Group) Send(msg interface{}) (chan int, chan error) {
 

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"sync"
 	"time"
 
@@ -13,10 +12,10 @@ import (
 )
 
 const (
-	CHANNEL_FEISHU = iota
+	channel_feishu = iota
 )
 
-type Common struct {
+type Client struct {
 	Channel  int
 	Opt      option.Option
 	Ctx      context.Context
@@ -30,7 +29,7 @@ type Common struct {
 	lock sync.WaitGroup
 }
 
-func (c *Common) Init() *Common {
+func (c *Client) Init() *Client {
 
 	c.Opt.Default()
 
@@ -41,7 +40,7 @@ func (c *Common) Init() *Common {
 	c.lock = sync.WaitGroup{}
 
 	switch c.Channel {
-	case CHANNEL_FEISHU:
+	case channel_feishu:
 		c.Cli = &service.Feishu{Ctx: c.Ctx, Opt: c.Opt}
 	default:
 	}
@@ -52,7 +51,7 @@ func (c *Common) Init() *Common {
 	return c
 }
 
-func (c *Common) Send(msg interface{}) (statusCode int, err error) {
+func (c *Client) Send(msg interface{}) (statusCode int, err error) {
 
 	b, err := json.Marshal(msg)
 	if err != nil {
@@ -62,16 +61,12 @@ func (c *Common) Send(msg interface{}) (statusCode int, err error) {
 
 	buffer := bytes.NewBuffer(b)
 
-	fmt.Println(len(c.Chan), len(c.AckChan), len(c.ErrChan))
-
 	c.Chan <- string(buffer.Bytes())
-
-	fmt.Println(len(c.Chan), len(c.AckChan), len(c.ErrChan))
 
 	return <-c.AckChan, <-c.ErrChan
 }
 
-func (c *Common) SendMsgRun() {
+func (c *Client) SendMsgRun() {
 	if len(c.Chan) > 0 {
 		msg := <-c.Chan
 
@@ -82,24 +77,22 @@ func (c *Common) SendMsgRun() {
 	}
 }
 
-func (c *Common) start() {
+func (c *Client) start() {
 	for {
 		<-c.rateChan
-
-		fmt.Println("rate done")
 
 		go c.SendMsgRun()
 	}
 }
 
-func (c *Common) startLoop() {
+func (c *Client) startLoop() {
 	time.AfterFunc(c.Opt.Rate, c.startLoop)
 
 	c.rateChan <- true
 }
 
 // close all chan
-func (c *Common) close() {
+func (c *Client) close() {
 	<-c.Ctx.Done()
 
 	c.Opt.Log.Println("Close notice service.")
@@ -108,6 +101,6 @@ func (c *Common) close() {
 	close(c.Chan)
 }
 
-func (c *Common) Error() chan error {
+func (c *Client) Error() chan error {
 	return c.ErrChan
 }
