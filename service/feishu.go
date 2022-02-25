@@ -56,11 +56,11 @@ func (s *Feishu) Send(msg string) (statusCode int, err error) {
 
 	req, err := http.NewRequestWithContext(s.Ctx, http.MethodPost, s.Opt.Webhook, buffer)
 
-	req.Header.Set("Content-Type", "application/json")
-
 	if err != nil {
 		return
 	}
+
+	req.Header.Set("Content-Type", "application/json")
 
 	res, err := s.client.Do(req)
 	if err != nil {
