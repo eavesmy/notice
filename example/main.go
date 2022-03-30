@@ -14,7 +14,7 @@ func main() {
 	ctx := context.Background()
 	feishu := notice.Feishu(option.Option{
 		Keyword: "PCOIN",
-		Webhook: "",
+		Uuid:    "33cd14f7-d482-4464-8d51-20237962f62f",
 		Rate:    time.Second * 2,
 	}, ctx)
 

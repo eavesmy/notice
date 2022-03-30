@@ -15,6 +15,7 @@ import (
 
 type Option struct {
 	Webhook   string
+	Uuid      string
 	Keyword   string
 	Signature string
 

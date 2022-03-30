@@ -18,6 +18,8 @@ import (
 	"github.com/eavesmy/notice/option"
 )
 
+const BASE_URL = "https://open.feishu.cn/open-apis/bot/v2/hook/"
+
 type Feishu struct {
 	client *http.Client
 	Ctx    context.Context
@@ -42,6 +44,10 @@ func (s *Feishu) Send(msg string) (statusCode int, err error) {
 	}
 
 	body.Content.Text = msg
+
+	if s.Opt.Webhook == "" {
+		s.Opt.Webhook = BASE_URL + s.Opt.Uuid
+	}
 
 	if s.Opt.Keyword != "" {
 		body.Content.Text = s.Opt.Keyword + "\n" + msg
