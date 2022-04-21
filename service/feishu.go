@@ -11,7 +11,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -78,8 +77,6 @@ func (s *Feishu) Send(msg string) (statusCode int, err error) {
 	if err != nil {
 		return
 	}
-
-	fmt.Println(string(b))
 
 	statusCode = res.StatusCode
 
