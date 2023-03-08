@@ -3,7 +3,6 @@ package notice
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"sync"
 	"time"
 
@@ -51,15 +50,9 @@ func (c *Client) Init() *Client {
 	return c
 }
 
-func (c *Client) Send(msg interface{}) (statusCode int, err error) {
+func (c *Client) Send(msg string) (statusCode int, err error) {
 
-	b, err := json.Marshal(msg)
-	if err != nil {
-		c.ErrChan <- err
-		return
-	}
-
-	buffer := bytes.NewBuffer(b)
+	buffer := bytes.NewBufferString(msg)
 
 	c.Chan <- string(buffer.Bytes())
 
