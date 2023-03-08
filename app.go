@@ -22,7 +22,7 @@ func Feishu(opt option.Option, ctx context.Context) *Client {
 
 type Group []*Client
 
-func (g *Group) Send(msg interface{}) (chan int, chan error) {
+func (g *Group) Send(msg string) (chan int, chan error) {
 
 	ack := make(chan int, len(*g))
 	errs := make(chan error, len(*g))
