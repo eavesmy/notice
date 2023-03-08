@@ -21,9 +21,8 @@ type Client struct {
 	Cli      service.Service
 	Chan     chan string
 	rateChan chan bool
-
-	ErrChan chan error
-	AckChan chan int
+	ErrChan  chan error
+	AckChan  chan int
 
 	lock sync.WaitGroup
 }
