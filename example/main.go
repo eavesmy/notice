@@ -17,19 +17,11 @@ func main() {
 		Keyword: "TEST",
 		// Uuid:    "33cd14f7-d482-4464-8d51-20237962f62f",
 		//   or
-		// Webhook: "https://open.feishu.cn/open-apis/bot/v2/hook/33cd14f7-d482-4464-8d51-20237962f62f",
-		Rate: time.Second * 2,
+		Webhook: "https://open.feishu.cn/open-apis/bot/v2/hook/5bcf3df5-f6b6-4aac-a67e-8ad8c998af38",
+		Rate:    time.Second * 2,
 	}, ctx)
 
-	code, err := feishu.Send("test")
-	fmt.Println(code, err)
-
-	code, err = feishu.Send("test")
-	fmt.Println(code, err)
-
-	code, err = feishu.Send("test")
-	fmt.Println(code, err)
-
-	code, err = feishu.Send("test")
-	fmt.Println(code, err)
+	for {
+		fmt.Println(time.Now().Format(time.RFC3339), feishu.Send("test"))
+	}
 }

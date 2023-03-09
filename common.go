@@ -3,11 +3,11 @@ package notice
 import (
 	"bytes"
 	"context"
-	"sync"
-	"time"
-
+	"errors"
+	"fmt"
 	"github.com/eavesmy/notice/option"
 	"github.com/eavesmy/notice/service"
+	"time"
 )
 
 const (
@@ -23,19 +23,11 @@ type Client struct {
 	rateChan chan bool
 	ErrChan  chan error
 	AckChan  chan int
-
-	lock sync.WaitGroup
 }
 
 func (c *Client) Init() *Client {
 
 	c.Opt.Default()
-
-	c.rateChan = make(chan bool, 1)
-
-	c.ErrChan = make(chan error, 10)
-	c.AckChan = make(chan int, 10)
-	c.lock = sync.WaitGroup{}
 
 	switch c.Channel {
 	case channel_feishu:
@@ -43,44 +35,37 @@ func (c *Client) Init() *Client {
 	default:
 	}
 
-	go c.startLoop()
 	go c.start()
 
 	return c
 }
 
-func (c *Client) Send(msg string) (statusCode int, err error) {
+func (c *Client) Send(msg string) (err error) {
 
 	buffer := bytes.NewBufferString(msg)
 
+	if c.Opt.MaxBytesLimit != 0 && len(buffer.Bytes()) > c.Opt.MaxBytesLimit {
+		return errors.New("msg oversize: %d/%d")
+	}
+
+	if len(c.Chan) > c.Opt.MaxMsgLimit {
+		return errors.New(fmt.Sprintf("msg channel overflow: %d/%d", len(c.Chan), c.Opt.MaxMsgLimit))
+	}
+
 	c.Chan <- string(buffer.Bytes())
 
-	return <-c.AckChan, <-c.ErrChan
-}
-
-func (c *Client) SendMsgRun() {
-	if len(c.Chan) > 0 {
-		msg := <-c.Chan
-
-		statusCode, err := c.Cli.Send(msg)
-
-		c.AckChan <- statusCode
-		c.ErrChan <- err
-	}
+	return nil
 }
 
 func (c *Client) start() {
 	for {
-		<-c.rateChan
+		msg := <-c.Chan
 
-		go c.SendMsgRun()
+		statuc, err := c.Cli.Send(msg)
+		fmt.Println(statuc, err)
+
+		time.Sleep(c.Opt.Rate)
 	}
-}
-
-func (c *Client) startLoop() {
-	time.AfterFunc(c.Opt.Rate, c.startLoop)
-
-	c.rateChan <- true
 }
 
 // close all chan
@@ -89,10 +74,5 @@ func (c *Client) close() {
 
 	c.Opt.Log.Println("Close notice service.")
 
-	close(c.rateChan)
 	close(c.Chan)
-}
-
-func (c *Client) Error() chan error {
-	return c.ErrChan
 }

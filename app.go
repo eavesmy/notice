@@ -7,6 +7,7 @@ package notice
 
 import (
 	"context"
+	"sync"
 
 	"github.com/eavesmy/notice/option"
 )
@@ -22,17 +23,16 @@ func Feishu(opt option.Option, ctx context.Context) *Client {
 
 type Group []*Client
 
-func (g *Group) Send(msg string) (chan int, chan error) {
+func (g *Group) Send(msg string) (errors []error) {
 
-	ack := make(chan int, len(*g))
-	errs := make(chan error, len(*g))
+	wg := sync.WaitGroup{}
+	wg.Add(len(*g))
 
 	for _, comm := range *g {
-		code, err := comm.Send(msg)
-
-		ack <- code
-		errs <- err
+		go func(c *Client) {
+			errors = append(errors, c.Send(msg))
+		}(comm)
 	}
 
-	return ack, errs
+	return errors
 }
