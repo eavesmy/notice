@@ -52,7 +52,9 @@ func (c *Client) Send(msg string) (err error) {
 		return errors.New(fmt.Sprintf("msg channel overflow: %d/%d", len(c.Chan), c.Opt.MaxMsgLimit))
 	}
 
-	c.Chan <- string(buffer.Bytes())
+	go func() {
+		c.Chan <- string(buffer.Bytes())
+	}()
 
 	return nil
 }

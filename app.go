@@ -17,7 +17,7 @@ func Feishu(opt option.Option, ctx context.Context) *Client {
 		Channel: channel_feishu,
 		Opt:     opt,
 		Ctx:     ctx,
-		Chan:    make(chan string, 10),
+		Chan:    make(chan string, opt.MaxMsgLimit),
 	}).Init()
 }
 
