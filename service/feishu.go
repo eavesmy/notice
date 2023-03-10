@@ -32,7 +32,7 @@ type FeishuPayload struct {
 	} `json:"content"`
 }
 
-func (s *Feishu) Send(msg string) (statusCode int, err error) {
+func (s *Feishu) Send(msg *bytes.Buffer) (statusCode int, err error) {
 
 	if s.client == nil {
 		s.client = &http.Client{}
@@ -42,14 +42,14 @@ func (s *Feishu) Send(msg string) (statusCode int, err error) {
 		MsgType: "text",
 	}
 
-	body.Content.Text = msg
+	body.Content.Text = msg.String()
 
 	if s.Opt.Webhook == "" {
 		s.Opt.Webhook = BASE_URL + s.Opt.Uuid
 	}
 
 	if s.Opt.Keyword != "" {
-		body.Content.Text = s.Opt.Keyword + "\n" + msg
+		body.Content.Text = s.Opt.Keyword + "\n" + msg.String()
 	}
 
 	b, err := json.Marshal(body)

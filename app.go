@@ -6,6 +6,7 @@
 package notice
 
 import (
+	"bytes"
 	"context"
 	"sync"
 
@@ -13,11 +14,14 @@ import (
 )
 
 func Feishu(opt option.Option, ctx context.Context) *Client {
+
+	opt.Default()
+
 	return (&Client{
 		Channel: channel_feishu,
 		Opt:     opt,
 		Ctx:     ctx,
-		Chan:    make(chan string, opt.MaxMsgLimit),
+		Chan:    make(chan *bytes.Buffer, opt.MaxMsgLimit),
 	}).Init()
 }
 

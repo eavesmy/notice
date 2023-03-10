@@ -7,7 +7,11 @@
 
 package service
 
+import (
+	"bytes"
+)
+
 type Service interface {
 	// Send msg to your robot.
-	Send(string) (int, error)
+	Send(writer *bytes.Buffer) (int, error)
 }

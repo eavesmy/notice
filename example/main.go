@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/eavesmy/notice"
@@ -22,6 +21,6 @@ func main() {
 	}, ctx)
 
 	for {
-		fmt.Println(time.Now().Format(time.RFC3339), feishu.Send("test"))
+		feishu.Send("test")
 	}
 }

@@ -19,15 +19,13 @@ type Client struct {
 	Opt      option.Option
 	Ctx      context.Context
 	Cli      service.Service
-	Chan     chan string
+	Chan     chan *bytes.Buffer
 	rateChan chan bool
 	ErrChan  chan error
 	AckChan  chan int
 }
 
 func (c *Client) Init() *Client {
-
-	c.Opt.Default()
 
 	switch c.Channel {
 	case channel_feishu:
@@ -44,7 +42,7 @@ func (c *Client) Send(msg string) (err error) {
 
 	buffer := bytes.NewBufferString(msg)
 
-	if c.Opt.MaxBytesLimit != 0 && len(buffer.Bytes()) > c.Opt.MaxBytesLimit {
+	if c.Opt.MaxBytesLimit != 0 && buffer.Len() > c.Opt.MaxBytesLimit {
 		return errors.New("msg oversize: %d/%d")
 	}
 
@@ -53,20 +51,23 @@ func (c *Client) Send(msg string) (err error) {
 	}
 
 	go func() {
-		c.Chan <- string(buffer.Bytes())
+		c.Chan <- buffer
 	}()
 
 	return nil
 }
 
 func (c *Client) start() {
+
+	timer := time.NewTimer(c.Opt.Rate)
+
 	for {
-		msg := <-c.Chan
+		<-timer.C
 
-		statuc, err := c.Cli.Send(msg)
-		fmt.Println(statuc, err)
+		fmt.Printf("发送 Feishu. 当前剩余 %d/%d 条\n ", len(c.Chan), c.Opt.MaxMsgLimit)
+		c.Cli.Send(<-c.Chan)
 
-		time.Sleep(c.Opt.Rate)
+		timer.Reset(c.Opt.Rate)
 	}
 }
 
