@@ -72,6 +72,8 @@ func (s *Feishu) Send(msg *bytes.Buffer) (statusCode int, err error) {
 		return
 	}
 
+	defer res.Body.Close()
+
 	// 一次性读完
 	b, err = ioutil.ReadAll(res.Body)
 	if err != nil {
