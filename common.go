@@ -50,9 +50,7 @@ func (c *Client) Send(msg string) (err error) {
 		return errors.New(fmt.Sprintf("msg channel overflow: %d/%d", len(c.Chan), c.Opt.MaxMsgLimit))
 	}
 
-	go func() {
-		c.Chan <- buffer
-	}()
+	c.Chan <- buffer
 
 	return nil
 }
